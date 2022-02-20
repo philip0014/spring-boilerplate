@@ -1,0 +1,8 @@
+,------.                                        ,--.
+|  .---' ,--.  ,--.  ,--,--. ,--,--,--.  ,---.  |  |  ,---.
+|  `--,   \  `'  /  ' ,-.  | |        | | .-. | |  | | .-. :
+|  `---.  /  /.  \  \ '-'  | |  |  |  | | '-' ' |  | \   --.
+`------' '--'  '--'  `--`--' `--`--`--' |  |-'  `--'  `----'
+                                        `--'
+${spring.application.name} (${application.version}) powered by Spring Boot ${spring-boot.version}
+Active profile: ${spring.profiles.active}

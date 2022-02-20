@@ -1,0 +1,37 @@
+package com.example.seeder;
+
+import com.example.configuration.ApplicationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+
+@Component
+public class MainSeeder {
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ApplicationProperties applicationProperties;
+
+    @Autowired
+    private ExampleSeeder exampleSeeder;
+
+    @PostConstruct
+    public void init() {
+        boolean isDevProfile = false;
+        for (String profile : environment.getActiveProfiles()) {
+            if ("dev".equals(profile)) {
+                isDevProfile = true;
+                break;
+            }
+        }
+
+        if (isDevProfile && applicationProperties.getDatabase().isSeederActive()) {
+            exampleSeeder.execute();
+        }
+    }
+
+}
