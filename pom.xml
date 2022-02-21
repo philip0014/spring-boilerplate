@@ -30,6 +30,7 @@
         <module>repository</module>
         <module>exception</module>
         <module>seeder</module>
+        <module>security</module>
         <module>properties</module>
     </modules>
 
@@ -40,7 +41,7 @@
         <postgresql.version>9.4.1209</postgresql.version>
         <project-reactor.version>3.3.5.RELEASE</project-reactor.version>
 
-<!--        <jwt.version>0.8.0</jwt.version>-->
+        <jwt.version>0.8.0</jwt.version>
         <orika.version>1.4.6</orika.version>
 
         <spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>

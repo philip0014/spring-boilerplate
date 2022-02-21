@@ -54,6 +54,11 @@
         </dependency>
         <dependency>
             <groupId>com.example</groupId>
+            <artifactId>security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
             <artifactId>seeder</artifactId>
             <version>${project.version}</version>
         </dependency>

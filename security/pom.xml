@@ -9,22 +9,38 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>configuration</artifactId>
+    <artifactId>security</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jwt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>helper</artifactId>
+            <artifactId>enumeration</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>security</artifactId>
+            <artifactId>exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>properties</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>repository</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
