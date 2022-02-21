@@ -1,12 +1,15 @@
 package com.example.seeder;
 
 import com.example.configuration.ApplicationProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
+@Slf4j
 @Component
 public class MainSeeder {
 
@@ -17,7 +20,7 @@ public class MainSeeder {
     private ApplicationProperties applicationProperties;
 
     @Autowired
-    private ExampleSeeder exampleSeeder;
+    private List<BaseSeeder> seeders;
 
     @PostConstruct
     public void init() {
@@ -30,7 +33,10 @@ public class MainSeeder {
         }
 
         if (isDevProfile && applicationProperties.getDatabase().isSeederActive()) {
-            exampleSeeder.execute();
+            for (BaseSeeder seeder : seeders) {
+                log.info("Executing seeder {}", seeder.getClass().getSimpleName());
+                seeder.execute();
+            }
         }
     }
 

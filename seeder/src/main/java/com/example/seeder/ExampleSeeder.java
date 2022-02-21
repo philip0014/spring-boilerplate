@@ -2,23 +2,23 @@ package com.example.seeder;
 
 import com.example.entity.Example;
 import com.example.repository.ExampleRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
-public class ExampleSeeder {
+public class ExampleSeeder implements BaseSeeder {
 
     @Autowired
     private ExampleRepository exampleRepository;
 
-    void execute() {
-        log.info("Executing ExampleSeeder");
+    @Override
+    public void execute() {
         for (int i = 0; i < 25; i++) {
-            exampleRepository.save(Example.builder()
-                .value("example_value_" + i)
-                .build());
+            exampleRepository.save(
+                Example.builder()
+                    .value("example_value_" + i)
+                    .build()
+            );
         }
     }
 
