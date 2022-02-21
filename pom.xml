@@ -30,6 +30,7 @@
         <module>repository</module>
         <module>exception</module>
         <module>seeder</module>
+        <module>properties</module>
     </modules>
 
     <properties>

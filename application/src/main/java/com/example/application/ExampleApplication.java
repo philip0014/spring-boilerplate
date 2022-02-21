@@ -1,6 +1,6 @@
 package com.example.application;
 
-import com.example.configuration.ApplicationProperties;
+import com.example.properties.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
