@@ -33,12 +33,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-//            .antMatchers("/api/auth/**").permitAll()
-            .antMatchers("/api/**").permitAll()
+            .antMatchers("/api/auth/**").permitAll()
+//            .antMatchers("/api/**").permitAll()
             .antMatchers(HttpMethod.GET, "/**").permitAll()
-//            .antMatchers(HttpMethod.POST, "/api/**").hasAuthority(UserRole.ADMIN.toString())
-//            .antMatchers(HttpMethod.PUT, "/api/**").hasAuthority(UserRole.ADMIN.toString())
-//            .antMatchers(HttpMethod.DELETE, "/api/**").hasAuthority(UserRole.ADMIN.toString())
+            .antMatchers(HttpMethod.POST, "/api/**").hasAuthority(UserRole.ADMIN.toString())
+            .antMatchers(HttpMethod.PUT, "/api/**").hasAuthority(UserRole.ADMIN.toString())
+            .antMatchers(HttpMethod.DELETE, "/api/**").hasAuthority(UserRole.ADMIN.toString())
             .and()
             .apply(new JwtSecurityConfigurer(jwtTokenProvider));
     }
