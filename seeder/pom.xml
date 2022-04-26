@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>com.example</groupId>
-            <artifactId>configuration</artifactId>
+            <artifactId>properties</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,6 +1,6 @@
 package com.example.seeder;
 
-import com.example.configuration.ApplicationProperties;
+import com.example.properties.ApplicationProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
