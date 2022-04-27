@@ -14,6 +14,7 @@ Helpful (hopefully) SpringBoot template that support basic needs such as:
 - CRUD to database using `JpaRepository`
 - Authentication and authorization with Spring security + JSON Web Token
 - Seeder to initialize data on your database
+- Fully reactive using [Project Reactor](https://projectreactor.io/)
 
 ## Modules
 List of modules
@@ -42,5 +43,5 @@ List of modules
 Add `-Dspring.profiles.active=<PROFILE>` on your VM options, for example `-Dspring.profiles.active=dev`
 
 
-### Activate or deactivate database seeder
+### Activate database seeder
 To activate database seeder, you must use `dev` profile and set `app.config.database.seeder-active=true` on properties
