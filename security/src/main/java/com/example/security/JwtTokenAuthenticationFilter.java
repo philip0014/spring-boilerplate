@@ -1,9 +1,11 @@
 package com.example.security;
 
 import com.example.enumeration.ErrorMessage;
+import com.example.enumeration.PermittedMethod;
 import com.example.exception.InvalidJwtAuthenticationException;
 import com.example.helper.JsonHelper;
 import com.example.helper.ResponseHelper;
+import com.example.properties.SecurityProperties;
 import com.example.web.model.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +29,22 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private SecurityProperties securityProperties;
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
-        boolean shouldNotBeFiltered = false;
-        // TODO implement list of permitted endpoint from properties
-        shouldNotBeFiltered = path.contains("/auth");
-        return shouldNotBeFiltered;
+        String requestPath = request.getRequestURI();
+        String requestMethod = request.getMethod();
+        for (SecurityProperties.PermittedEndpoint endpoint : securityProperties.getPermittedEndpoints()) {
+            boolean isPathStartsWith = requestPath.startsWith(endpoint.getPath());
+            boolean isMethodEqualOrAll = endpoint.getMethod().toString().equals(requestMethod)
+                || endpoint.getMethod() == PermittedMethod.ALL;
+            if (isPathStartsWith && isMethodEqualOrAll) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
