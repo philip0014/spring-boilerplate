@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>com.example</groupId>
+            <artifactId>helper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
             <artifactId>properties</artifactId>
             <version>${project.version}</version>
         </dependency>

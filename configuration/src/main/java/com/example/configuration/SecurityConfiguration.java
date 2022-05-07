@@ -2,7 +2,7 @@ package com.example.configuration;
 
 import com.example.enumeration.UserRole;
 import com.example.security.JwtSecurityConfigurer;
-import com.example.security.JwtTokenProvider;
+import com.example.security.JwtTokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @Bean
     @Override
@@ -33,6 +33,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
+            // TODO implement list of permitted endpoint from properties
             .antMatchers("/api/auth/**").permitAll()
 //            .antMatchers("/api/**").permitAll()
             .antMatchers(HttpMethod.GET, "/**").permitAll()
@@ -40,7 +41,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.PUT, "/api/**").hasAuthority(UserRole.ADMIN.toString())
             .antMatchers(HttpMethod.DELETE, "/api/**").hasAuthority(UserRole.ADMIN.toString())
             .and()
-            .apply(new JwtSecurityConfigurer(jwtTokenProvider));
+            .apply(new JwtSecurityConfigurer(jwtTokenAuthenticationFilter));
     }
 
 }
