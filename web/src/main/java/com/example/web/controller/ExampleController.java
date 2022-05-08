@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping(ExampleController.PATH)
 public class ExampleController {
@@ -53,9 +51,13 @@ public class ExampleController {
             .size(size)
             .build();
         return exampleService.getAll(pagingRequest)
-            .map(o -> ResponseHelper
-                .okWithPaging(o.getPage() + 1, o.getSize(), o.getTotalPage(), o.getTotalSize(),
-                    objectMapper.mapAsList(o.getEntries(), ExampleResponse.class)));
+            .map(o -> ResponseHelper.okWithPaging(
+                o.getPage() + 1,
+                o.getSize(),
+                o.getTotalPage(),
+                o.getTotalSize(),
+                objectMapper.mapAsList(o.getEntries(), ExampleResponse.class))
+            );
     }
 
     @PostMapping
@@ -68,7 +70,7 @@ public class ExampleController {
 
     @PutMapping("/{id}")
     @ApiOperation("Update example by id")
-    public Mono<Response<ExampleResponse>> insert(@PathVariable String id,
+    public Mono<Response<ExampleResponse>> update(@PathVariable String id,
                                                   @RequestBody ExampleRequest request) {
         return exampleService.update(id, objectMapper.map(request, ExampleRequestDTO.class))
             .map(o -> objectMapper.map(o, ExampleResponse.class))

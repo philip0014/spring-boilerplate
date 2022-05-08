@@ -8,6 +8,7 @@ import com.example.security.JwtTokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private Environment environment;
 
     @Autowired
     private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
@@ -45,6 +49,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private void applyAntMatchersAndSecurityConfigurer(
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry)
         throws Exception {
+        boolean isTestProfile = false;
+        for (String profile : environment.getActiveProfiles()) {
+            if ("test".equals(profile)) {
+                isTestProfile = true;
+                break;
+            }
+        }
+
+        if (isTestProfile) {
+            urlRegistry
+                .antMatchers("/**").permitAll()
+                .and()
+                .apply(new JwtSecurityConfigurer(jwtTokenAuthenticationFilter));
+            return;
+        }
+
         for (SecurityProperties.PermittedEndpoint endpoint : securityProperties.getPermittedEndpoints()) {
             String modifiedPath = String.format("%s/**", endpoint.getPath());
             if (endpoint.getMethod() == PermittedMethod.ALL) {

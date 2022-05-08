@@ -15,4 +15,8 @@ public class JsonHelper {
         return jsonMapper.writeValueAsBytes(value);
     }
 
+    public static <T> T readFromString(String json, Class<T> clazz) throws JsonProcessingException {
+        return jsonMapper.readValue(json, clazz);
+    }
+
 }
