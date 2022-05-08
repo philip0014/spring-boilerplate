@@ -51,7 +51,7 @@ public class ExampleServiceImpl implements ExampleService {
                 .map(o -> objectMapper.map(o, ExampleResponseDTO.class))
                 .collect(Collectors.toList());
             monoSink.success(PagingHelper
-                .create(entries, pagingRequest, pageOfExamples.getTotalPages(),
+                .create(entries, pagingRequest.getPage(), pageOfExamples.getTotalPages(),
                     pageOfExamples.getTotalElements()));
         }).doOnError(error -> log.error("Error on getAll with request: {}", pagingRequest, error));
     }
