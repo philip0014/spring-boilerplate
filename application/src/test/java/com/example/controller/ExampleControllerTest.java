@@ -1,13 +1,10 @@
 package com.example.controller;
 
 import com.example.application.ExampleApplication;
+import com.example.entity.Example;
 import com.example.helper.JsonHelper;
 import com.example.helper.ObjectMapper;
-import com.example.service.ExampleService;
-import com.example.service.model.request.ExampleRequestDTO;
-import com.example.service.model.request.PagingRequestDTO;
-import com.example.service.model.response.ExampleResponseDTO;
-import com.example.service.model.response.PagingResponseDTO;
+import com.example.repository.ExampleRepository;
 import com.example.web.controller.ExampleController;
 import com.example.web.model.PagingResponse;
 import com.example.web.model.Response;
@@ -18,24 +15,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
@@ -51,34 +45,34 @@ public class ExampleControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private ExampleService exampleService;
+    @Autowired
+    private ExampleRepository exampleRepository;
 
-    private static final String ID = "id-001";
-    private static final String VALUE = "value-001";
-
-    private static ExampleResponseDTO responseDTO1;
-    private static ExampleResponseDTO responseDTO2;
-    private static List<ExampleResponseDTO> responseDTOS;
+    private static final String VALUE = "value";
+    private static final String VALUE_UPDATED = "valueUpdated";
 
     @Before
     public void setUp() {
-        generateExampleResponse();
+        resetDataOnDatabase();
+    }
 
-        responseDTOS = new ArrayList<>();
-        responseDTOS.add(responseDTO1);
-        responseDTOS.add(responseDTO2);
+    private void resetDataOnDatabase() {
+        exampleRepository.deleteAll();
+    }
+
+    private Example saveDataOnDatabase() {
+        return exampleRepository.save(Example.builder()
+            .value(VALUE)
+            .build());
     }
 
     @Test
     public void getById_thenStatus200() throws Exception {
-        when(exampleService.getById(ID)).thenReturn(Mono.create(monoSink -> {
-            monoSink.success(responseDTO1);
-        }));
+        Example example = saveDataOnDatabase();
 
         String jsonResponse = webTestClient
             .get()
-            .uri(ExampleController.PATH + "/" + ID)
+            .uri(ExampleController.PATH + "/" + example.getId())
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -89,25 +83,19 @@ public class ExampleControllerTest {
         Response response = JsonHelper.readFromString(jsonResponse, Response.class);
         ExampleResponse responseData = objectMapper.map(response.getData(), ExampleResponse.class);
 
-        verify(exampleService).getById(ID);
-
         assertNotNull(responseData);
-        assertEquals(VALUE, responseData.getValue());
+        assertEquals(example.getValue(), responseData.getValue());
     }
 
     @Test
     public void getAll_thenStatus200() throws Exception {
-        when(exampleService.getAll(any(PagingRequestDTO.class)))
-            .thenReturn(Mono.create(monoSink -> {
-                monoSink.success(
-                    PagingResponseDTO.<ExampleResponseDTO>builder()
-                        .entries(responseDTOS)
-                        .page(0)
-                        .size(responseDTOS.size())
-                        .totalSize(responseDTOS.size())
-                        .build()
-                );
-            }));
+        Example example1 = saveDataOnDatabase();
+        Example example2 = saveDataOnDatabase();
+        List<Example> examples = Arrays.asList(example1, example2);
+
+        Map<String, Example> exampleMap = new HashMap<>();
+        exampleMap.put(example1.getId(), example1);
+        exampleMap.put(example2.getId(), example2);
 
         String jsonResponse = webTestClient
             .get()
@@ -122,10 +110,16 @@ public class ExampleControllerTest {
         Response response = JsonHelper.readFromString(jsonResponse, Response.class);
         PagingResponse responseData = objectMapper.map(response.getData(), PagingResponse.class);
 
-        verify(exampleService).getAll(any(PagingRequestDTO.class));
-
         assertNotNull(responseData);
-        assertEquals(responseDTOS.size(), responseData.getEntries().size());
+        assertEquals(examples.size(), responseData.getEntries().size());
+
+        for (Object o : responseData.getEntries()) {
+            ExampleResponse exampleResponse = objectMapper.map(o, ExampleResponse.class);
+
+            Example exampleAssertion = exampleMap.get(exampleResponse.getId());
+            assertNotNull(exampleAssertion);
+            assertEquals(exampleAssertion.getValue(), exampleResponse.getValue());
+        }
     }
 
     @Test
@@ -133,11 +127,6 @@ public class ExampleControllerTest {
         ExampleRequest request = ExampleRequest.builder()
             .value(VALUE)
             .build();
-
-        when(exampleService.insert(any(ExampleRequestDTO.class)))
-            .thenReturn(Mono.create(monoSink -> {
-                monoSink.success(responseDTO1);
-            }));
 
         String jsonResponse = webTestClient
             .post()
@@ -154,26 +143,25 @@ public class ExampleControllerTest {
         Response response = JsonHelper.readFromString(jsonResponse, Response.class);
         ExampleResponse responseData = objectMapper.map(response.getData(), ExampleResponse.class);
 
-        verify(exampleService).insert(any(ExampleRequestDTO.class));
-
         assertNotNull(responseData);
-        assertEquals(VALUE, responseData.getValue());
+        assertEquals(request.getValue(), responseData.getValue());
+
+        Optional<Example> optionalExample = exampleRepository.findById(responseData.getId());
+        assertTrue(optionalExample.isPresent());
+        assertEquals(request.getValue(), optionalExample.get().getValue());
     }
 
     @Test
     public void update_thenStatus200() throws Exception {
-        ExampleRequest request = ExampleRequest.builder()
-            .value(VALUE)
-            .build();
+        Example example = saveDataOnDatabase();
 
-        when(exampleService.update(eq(ID), any(ExampleRequestDTO.class)))
-            .thenReturn(Mono.create(monoSink -> {
-                monoSink.success(responseDTO1);
-            }));
+        ExampleRequest request = ExampleRequest.builder()
+            .value(VALUE_UPDATED)
+            .build();
 
         String jsonResponse = webTestClient
             .put()
-            .uri(ExampleController.PATH + "/" + ID)
+            .uri(ExampleController.PATH + "/" + example.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(request))
             .accept(MediaType.APPLICATION_JSON)
@@ -186,22 +174,21 @@ public class ExampleControllerTest {
         Response response = JsonHelper.readFromString(jsonResponse, Response.class);
         ExampleResponse responseData = objectMapper.map(response.getData(), ExampleResponse.class);
 
-        verify(exampleService).update(eq(ID), any(ExampleRequestDTO.class));
-
         assertNotNull(responseData);
-        assertEquals(VALUE, responseData.getValue());
+        assertEquals(request.getValue(), responseData.getValue());
+
+        Optional<Example> optionalExample = exampleRepository.findById(responseData.getId());
+        assertTrue(optionalExample.isPresent());
+        assertEquals(request.getValue(), optionalExample.get().getValue());
     }
 
     @Test
     public void delete_thenStatus200() throws Exception {
-        when(exampleService.delete(ID))
-            .thenReturn(Mono.create(monoSink -> {
-                monoSink.success(true);
-            }));
+        Example example = saveDataOnDatabase();
 
         String jsonResponse = webTestClient
             .delete()
-            .uri(ExampleController.PATH + "/" + ID)
+            .uri(ExampleController.PATH + "/" + example.getId())
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -212,22 +199,12 @@ public class ExampleControllerTest {
         Response response = JsonHelper.readFromString(jsonResponse, Response.class);
         Boolean responseData = objectMapper.map(response.getData(), Boolean.class);
 
-        verify(exampleService).delete(ID);
-
         assertNotNull(responseData);
         assertTrue(responseData);
-    }
 
-    private void generateExampleResponse() {
-        responseDTO1 = ExampleResponseDTO.builder()
-            .id(ID)
-            .value(VALUE)
-            .build();
-
-        responseDTO2 = ExampleResponseDTO.builder()
-            .id(ID)
-            .value(VALUE)
-            .build();
+        Optional<Example> optionalExample = exampleRepository.findById(example.getId());
+        assertTrue(optionalExample.isPresent());
+        assertTrue(optionalExample.get().isDeleted());
     }
 
 }
